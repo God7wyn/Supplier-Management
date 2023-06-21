@@ -30,13 +30,13 @@
 									<th scope="col" v-if="orders.name === 'Active Orders' || orders.name === 'Fulfilled Orders'" class="whitespace-nowrap px-2 py-2 text-left text-sm font-semibold text-gray-900">Due</th>
 									<th scope="col" v-if="orders.name === 'Fulfilled Orders'" class="whitespace-nowrap px-2 py-3.5 text-left text-sm font-semibold text-gray-900">Delivered</th>
 
-									<th scope="col" v-if="orders.name === 'Pending Orders'" class="relative whitespace-nowrap py-3.5 pl-3 pr-4 sm:pr-6">
+									<th scope="col" v-if="orders.name === 'Pending Orders' && $cookies.get('user').role === 'SUPPLIER'" class="relative whitespace-nowrap py-3.5 pl-3 pr-4 sm:pr-6">
 										<span class="sr-only">Approve</span>
 									</th>
-									<th scope="col" v-if="orders.name === 'Pending Orders'" class="relative whitespace-nowrap py-3.5 pl-3 pr-4 sm:pr-6">
+									<th scope="col" v-if="orders.name === 'Pending Orders' && $cookies.get('user').role === 'SUPPLIER'" class="relative whitespace-nowrap py-3.5 pl-3 pr-4 sm:pr-6">
 										<span class="sr-only">Reject</span>
 									</th>
-									<th scope="col" v-if="orders.name === 'Active Orders'" class="relative whitespace-nowrap py-3.5 pl-3 pr-4 sm:pr-6">
+									<th scope="col" v-if="orders.name === 'Active Orders' && $cookies.get('user').role === 'OWNER'" class="relative whitespace-nowrap py-3.5 pl-3 pr-4 sm:pr-6">
 										<span class="sr-only">Mark Fullfilled</span>
 									</th>
 									<th scope="col" v-if="orders.name === 'Fulfilled Orders'" class="relative whitespace-nowrap py-3.5 pl-3 pr-4 sm:pr-6">
@@ -54,24 +54,21 @@
 									<td v-if="orders.name === 'Active Orders' || orders.name === 'Fulfilled Orders'" class="whitespace-nowrap py-2 pl-2 pr-3 font-medium text-sm text-gray-900">{{ transaction.paymentStatus }}</td>
 									<td v-if="orders.name === 'Active Orders' || orders.name === 'Fulfilled Orders'" class="whitespace-nowrap px-2 py-2 text-sm text-gray-500">{{ dateFilter(transaction.due_date) }}</td>
 									<td v-if="orders.name === 'Fulfilled Orders'" class="whitespace-nowrap px-2 py-2 text-sm text-gray-500">{{ dateFilter(transaction.deliveredDate) }}</td>
-									<!-- <td class="whitespace-nowrap px-2 py-2 text-sm text-gray-500">{{ transaction.price }}</td>
-									<td class="whitespace-nowrap px-2 py-2 text-sm text-gray-500">{{ transaction.quantity }}</td>
-									<td class="whitespace-nowrap px-2 py-2 text-sm text-gray-500">{{ transaction.netAmount }}</td> -->
-									<td v-if="orders.name === 'Pending Orders'" class="relative whitespace-nowrap py-2 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+									<td v-if="orders.name === 'Pending Orders' && $cookies.get('user').role === 'SUPPLIER'" class="relative whitespace-nowrap py-2 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
 										<button
 											type="button"
-											@click="openApprove = true"
+											@click="openApproveModal(transaction)"
 											class="inline-flex items-center rounded-md border border-transparent bg-green-600 px-2 py-2 text-sm font-medium leading-4 text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
 										>
 											Approve
 										</button>
 									</td>
-									<td v-if="orders.name === 'Pending Orders'" class="relative whitespace-nowrap py-2 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+									<td v-if="orders.name === 'Pending Orders' && $cookies.get('user').role === 'SUPPLIER'" class="relative whitespace-nowrap py-2 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
 										<button type="button" @click="open = true" class="inline-flex items-center rounded-md border border-transparent bg-red-600 px-2 py-2 text-sm font-medium leading-4 text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
 											Reject
 										</button>
 									</td>
-									<td v-if="orders.name === 'Active Orders'" class="relative whitespace-nowrap py-2 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+									<td v-if="orders.name === 'Active Orders' && $cookies.get('user').role === 'OWNER'" class="relative whitespace-nowrap py-2 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
 										<button
 											type="button"
 											@click="open = true"
@@ -90,7 +87,6 @@
 											<StarIcon class="ml-2 -mr-0.5 h-4 w-4" aria-hidden="true" />
 										</button>
 									</td>
-									<ApproveModal :open="openApprove" @close="openApprove = false" :invoiceID="transaction._id" :products="transaction.invoiceProducts" :currency="transaction.currency" />
 								</tr>
 							</tbody>
 						</table>
@@ -99,25 +95,49 @@
 			</div>
 		</div>
 	</div>
-
-	<RejectModal :open="openReject" @close="openReject = false" />
-	<SettleModal :open="openSettle" @close="openSettle = false" />
-	<RateModal :open="openRate" @close="openRate = false" />
+	<ApproveModal v-if="openApprove" :open="openApprove" @close="closeApproveModal($event)" :invoiceID="approvedData._id" :products="approvedData.invoiceProducts" :currency="approvedData.currency" />
+	<!-- <RejectModal v-if="openApprove" :open="openReject" @close="openReject = false" /> -->
+	<SettleModal v-if="openSettle" :open="openSettle" @close="closeSettleModal($event)" />
+	<RateModal v-if="openRate" :open="openRate" @close="closeRateModal($event)" />
 </template>
 
 <script setup>
 import { ref } from "vue";
 import { StarIcon } from "@heroicons/vue/24/solid";
 import ApproveModal from "./ApproveModal.vue";
-import RejectModal from "./RejectModal.vue";
+// import RejectModal from "./RejectModal.vue";
 import SettleModal from "./SettleModal.vue";
 import RateModal from "./RateModal.vue";
 import JsonCSV from "vue-json-csv";
 
 const openApprove = ref(false);
-const openReject = ref(false);
+const approvedData = ref({});
+const openApproveModal = (transaction) => {
+	approvedData.value = transaction;
+	openApprove.value = true;
+};
+const closeApproveModal = (event) => {
+	openApprove.value = event;
+};
+
+// const openReject = ref(false);
 const openSettle = ref(false);
+const openSettleModal = (transaction) => {
+	settledData.value = transaction;
+	openSettle.value = true;
+};
+const closeSettleModal = (event) => {
+	openSettle.value = event;
+};
 const openRate = ref(false);
+const openRateModal = (transaction) => {
+	ratedData.value = transaction;
+	openRate.value = true;
+};
+const closeRateModal = (event) => {
+	openRate.value = event;
+};
+
 const props = defineProps(["orders"]);
 
 const grossAmountFilter = (invoice) => {

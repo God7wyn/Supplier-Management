@@ -47,8 +47,9 @@ import BarChart from "../components/BarChart.vue";
 const toast = useToast();
 const refreshGraph = ref(false);
 
-const fromDate = ref(new Date());
-const toDate = ref(new Date());
+const currentYear = new Date().getFullYear();
+const fromDate = ref(new Date(currentYear, 0, 1));
+const toDate = ref(new Date(currentYear, 11, 31));
 const groupBy = ref("department");
 const lineGraphData = ref();
 const barGraphData = ref();

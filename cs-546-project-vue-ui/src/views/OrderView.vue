@@ -38,18 +38,22 @@ const tabs = reactive([
 	{ name: "Cancelled Orders", description: "A table of placeholder cancelled orders data that does not make any sense.", current: false, data: [] },
 ]);
 
-try {
-	const { data } = await axios.get("/invoice");
-	console.log(data);
-	tabs[0].data = data.PENDING;
-	tabs[1].data = data.APPROVED;
-	tabs[2].data = data.COMPLETED;
-	tabs[3].data = data.REJECTED;
-} catch (e) {
-	e.response.data.errors.forEach((error) => {
-		toast.error(error.msg);
-	});
-}
+const getInvoice = async () => {
+	try {
+		const { data } = await axios.get("/invoice");
+
+		tabs[0].data = data.PENDING;
+		tabs[1].data = data.APPROVED;
+		tabs[2].data = data.COMPLETED;
+		tabs[3].data = data.REJECTED;
+	} catch (e) {
+		e.response.data.errors.forEach((error) => {
+			toast.error(error.msg);
+		});
+	}
+};
+
+await getInvoice();
 
 const changeCurrentTab = (item) => {
 	for (let i = 0; i < tabs.length; i++) {

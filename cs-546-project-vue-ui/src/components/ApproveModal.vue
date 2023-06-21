@@ -37,7 +37,7 @@
 											</tr>
 										</thead>
 										<tbody>
-											<tr v-for="product in products" :key="product._id" class="border-b border-gray-200">
+											<tr v-for="product in props.products" :key="product._id" class="border-b border-gray-200">
 												<td class="py-4 pl-4 pr-3 text-sm sm:pl-6 md:pl-0">
 													<div class="font-medium text-gray-900">{{ product.productID }}</div>
 												</td>
@@ -90,29 +90,13 @@ import { useRouter } from "vue-router";
 
 const router = useRouter();
 const toast = useToast();
-const props = defineProps(["open", "products", "currency", "invoiceID"]);
+const props = defineProps(["open", "products", "currency", "invoiceID", "approveData"]);
 const emit = defineEmits(["close"]);
-const products = ref(props.products);
 const date = ref(new Date());
 const paidAmount = ref(null);
 const netAmount = ref(null);
-console.log(products.value);
 
 const onSubmit = async () => {
-	// const invoice = {
-	// 	supplierID: props.selectedSupplier._id,
-	// 	invoiceProducts: [],
-	// 	currency: selectedCurrency.value,
-	// };
-
-	// products.value.map((product) => {
-	// 	order.invoiceProducts.push({
-	// 		productID: product._id,
-	// 		quantity: product.stock,
-	// 	});
-	// });
-	console.log(date.value);
-
 	try {
 		await axios.post(`/invoice/${props.invoiceID}/approve`, {
 			due_date: date.value,
@@ -120,7 +104,7 @@ const onSubmit = async () => {
 			net_amount: Number(netAmount.value),
 		});
 		toast.success("Invoice Approved!");
-		router.push("/dashboard/orders");
+		emit("close", false);
 	} catch (e) {
 		e.response.data.errors.forEach((error) => {
 			toast.error(error.msg);

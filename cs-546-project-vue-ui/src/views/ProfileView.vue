@@ -11,13 +11,13 @@
 						<div class="grid grid-cols-6 gap-6">
 							<div class="col-span-6 sm:col-span-3">
 								<label for="organization" class="block text-sm font-medium text-gray-700">Company name</label>
-								<Field type="text" name="organization" id="organization" :value="data.organization" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+								<Field type="text" name="organization" id="organization" :value="data.organization" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm disabled:bg-gray-100" disabled />
 								<ErrorMessage class="mt-2 text-sm text-red-600" name="organization" />
 							</div>
 
 							<div class="col-span-6 sm:col-span-4">
 								<label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
-								<Field type="text" name="email" id="email" :value="data.email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+								<Field type="text" name="email" id="email" :value="data.email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm disabled:bg-gray-100" disabled />
 								<ErrorMessage class="mt-2 text-sm text-red-600" name="email" />
 							</div>
 

@@ -113,14 +113,6 @@ const schema = yup
 			.matches(/^((?!\s{2}).)*$/, "Multiple spaces in between")
 			.matches(/[a-zA-Z]/, "Product name must contain only alphabet")
 			.test({
-				message: "Product name can't contain number",
-				test: (value) => {
-					const numRegex = /[0-9]/;
-					if (numRegex.test(value)) return false;
-					return true;
-				},
-			})
-			.test({
 				message: "Product name can't contain special characters",
 				test: (value) => {
 					const specialRegex = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/;
